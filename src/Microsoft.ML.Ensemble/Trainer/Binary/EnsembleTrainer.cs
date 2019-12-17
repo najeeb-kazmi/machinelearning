@@ -8,7 +8,6 @@ using System.Linq;
 using Microsoft.ML;
 using Microsoft.ML.CommandLine;
 using Microsoft.ML.Data;
-using Microsoft.ML.EntryPoints;
 using Microsoft.ML.Internal.Internallearn;
 using Microsoft.ML.Runtime;
 using Microsoft.ML.Trainers.Ensemble;
@@ -51,9 +50,6 @@ namespace Microsoft.ML.Trainers.Ensemble
             // REVIEW: If we make this public again it should be an *estimator* of this type of predictor, rather than the (deprecated) ITrainer.
             [Argument(ArgumentType.Multiple, HelpText = "Base predictor type", ShortName = "bp,basePredictorTypes", SortOrder = 1, Visibility = ArgumentAttribute.VisibilityType.CmdLineOnly, SignatureType = typeof(SignatureBinaryClassifierTrainer))]
             public IComponentFactory<TScalarTrainer>[] BasePredictors;
-
-            [Argument(ArgumentType.Multiple, Visibility = ArgumentAttribute.VisibilityType.EntryPointsOnly)]
-            public IEnsembleBinaryBasePredictorFactory[] BasePredictor = new[] { new LinearSvmTrainer.Options() };
 
             internal override IComponentFactory<TScalarTrainer>[] GetPredictorFactories() => BasePredictors;
 

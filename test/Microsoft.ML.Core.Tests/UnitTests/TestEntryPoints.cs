@@ -614,65 +614,6 @@ namespace Microsoft.ML.RunTests
         }
 
         [Fact]
-        public void EnsembleBinaryClassifierWithBasePredictor()
-        {
-            var dataPath = GetDataPath("breast-cancer.txt");
-            var modelPath = DeleteOutputPath("model.zip");
-
-            string inputGraph = string.Format(@"
-                {{
-                  'Nodes': [
-                    {{
-                      'Name': 'Data.CustomTextLoader',
-                      'Inputs': {{
-                        'InputFile': '$file1'
-                      }},
-                      'Outputs': {{
-                        'Data': '$data1'
-                      }}
-                    }},
-                    {{
-                      'Name': 'Trainers.EnsembleBinaryClassifier',
-                      'Inputs': {{
-                        'TrainingData': '$data1',
-                        'NumModels': 2,
-                        'BasePredictor': [
-                          {{
-                            'Name': 'LinearSVM',
-                            'Settings': {{
-                              'TrainingData': '$data1'
-                            }}
-                          }},
-                          {{
-                            'Name': 'LinearSVM',
-                            'Settings': {{
-                              'TrainingData': '$data1'
-                            }}
-                          }}
-                         ]
-                      }},
-                      'Outputs': {{
-                        'PredictorModel': '$model1'
-                      }}
-                    }}
-                  ],
-                  'Inputs' : {{
-                    'file1' : '{0}'
-                  }},
-                  'Outputs' : {{
-                    'model1' : '{1}'
-                  }}
-                }}", EscapePath(dataPath), EscapePath(modelPath));
-
-            var jsonPath = DeleteOutputPath("graph.json");
-            File.WriteAllLines(jsonPath, new[] { inputGraph });
-
-            var args = new ExecuteGraphCommand.Arguments() { GraphPath = jsonPath };
-            var cmd = new ExecuteGraphCommand(Env, args);
-            cmd.Run();
-        }
-
-        [Fact]
         public void BinaryPermutationFeatureImportance()
         {
             var inputDataPath = GetDataPath("adult.tiny.with-schema.txt");

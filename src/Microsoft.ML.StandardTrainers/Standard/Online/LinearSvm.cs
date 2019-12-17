@@ -25,8 +25,6 @@ using Microsoft.ML.Trainers;
 
 namespace Microsoft.ML.Trainers
 {
-    using TScalarTrainer = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<float>>, IPredictorProducing<float>>;
-
     /// <summary>
     /// The <see cref="IEstimator{TTransformer}"/> to predict a target using a linear binary classification model
     /// trained with Linear SVM.
@@ -78,8 +76,7 @@ namespace Microsoft.ML.Trainers
         /// Options for the <see cref="LinearSvmTrainer"/> as used in
         /// <see cref="StandardTrainersCatalog.LinearSvm(BinaryClassificationCatalog.BinaryClassificationTrainers, Options)"/>.
         /// </summary>
-        [TlcModule.Component(Name = LoadNameValue, FriendlyName = UserNameValue)]
-        public sealed class Options : OnlineLinearOptions, IEnsembleBinaryBasePredictorFactory
+        public sealed class Options : OnlineLinearOptions
         {
             [Argument(ArgumentType.AtMostOnce, HelpText = "Regularizer constant", ShortName = "lambda", SortOrder = 50)]
             [TGUI(SuggestedSweeps = "0.00001-0.1;log;inc:10")]
@@ -109,8 +106,6 @@ namespace Microsoft.ML.Trainers
             /// </summary>
             [Argument(ArgumentType.AtMostOnce, HelpText = "Column to use for example weight", ShortName = "weight,WeightColumn", SortOrder = 4, Visibility = ArgumentAttribute.VisibilityType.EntryPointsOnly)]
             public string ExampleWeightColumnName = null;
-
-            TScalarTrainer IComponentFactory<TScalarTrainer>.CreateComponent(IHostEnvironment env) => new LinearSvmTrainer(env, this);
         }
 
         private sealed class TrainState : TrainStateBase
