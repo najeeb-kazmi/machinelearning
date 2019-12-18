@@ -26,7 +26,7 @@ namespace Microsoft.ML.Trainers.Ensemble
     using TScalarTrainer = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<float>>, IPredictorProducing<float>>;
 
     internal sealed class RegressionEnsembleTrainer : EnsembleTrainerBase<float,
-       IRegressionSubModelSelector, IRegressionOutputCombiner>,
+       IRegressionSubModelSelector, IRegressionOutputCombiner, RegressionPredictionTransformer<EnsembleModelParametersBase<float>>, EnsembleModelParametersBase<float>>,
        IModelCombiner
     {
         public const string LoadNameValue = "EnsembleRegression";
@@ -75,9 +75,9 @@ namespace Microsoft.ML.Trainers.Ensemble
 
         private protected override PredictionKind PredictionKind => PredictionKind.Regression;
 
-        private protected override IPredictor CreatePredictor(List<FeatureSubsetModel<float>> models)
+        private protected override EnsembleModelParametersBase<float> CreatePredictor()
         {
-            return new EnsembleModelParameters(Host, PredictionKind, CreateModels<TScalarPredictor>(models), Combiner);
+            return new EnsembleModelParameters(Host, PredictionKind, CreateModels<TScalarPredictor>(Models), Combiner);
         }
 
         public IPredictor CombineModels(IEnumerable<IPredictor> models)
@@ -93,5 +93,23 @@ namespace Microsoft.ML.Trainers.Ensemble
 
             return predictor;
         }
+
+        private protected override void CheckLabel(RoleMappedData data)
+        {
+            Contracts.AssertValue(data);
+            data.CheckRegressionLabel();
+        }
+
+        private protected override SchemaShape.Column[] GetOutputColumnsCore(SchemaShape inputSchema)
+        {
+            return new[]
+            {
+                new SchemaShape.Column(DefaultColumnNames.Score, SchemaShape.Column.VectorKind.Scalar, NumberDataViewType.Single, false, new SchemaShape(AnnotationUtils.GetTrainerOutputAnnotation()))
+            };
+        }
+
+        private protected override RegressionPredictionTransformer<EnsembleModelParametersBase<float>>
+            MakeTransformer(EnsembleModelParametersBase<float> model, DataViewSchema trainSchema)
+            => new RegressionPredictionTransformer<EnsembleModelParametersBase<float>>(Host, model, trainSchema, FeatureColumn.Name);
     }
 }
