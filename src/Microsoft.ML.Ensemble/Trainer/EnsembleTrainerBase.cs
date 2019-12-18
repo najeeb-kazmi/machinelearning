@@ -17,9 +17,11 @@ namespace Microsoft.ML.Trainers.Ensemble
 {
     using Stopwatch = System.Diagnostics.Stopwatch;
 
-    internal abstract class EnsembleTrainerBase<TOutput, TSelector, TCombiner> : ITrainer<IPredictor>
-         where TSelector : class, ISubModelSelector<TOutput>
-         where TCombiner : class, IOutputCombiner<TOutput>
+    internal abstract class EnsembleTrainerBase<TOutput, TSelector, TCombiner, TTransformer, TModel> : TrainerEstimatorBase<TTransformer, TModel>
+        where TSelector : class, ISubModelSelector<TOutput>
+        where TCombiner : class, IOutputCombiner<TOutput>
+        where TTransformer : ISingleFeaturePredictionTransformer<TModel>
+        where TModel : class
     {
         public abstract class ArgumentsBase : TrainerInputBaseWithLabel
         {
@@ -58,7 +60,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         /// <summary> Command-line arguments </summary>
         private protected readonly ArgumentsBase Args;
         private protected readonly int NumModels;
-        private protected readonly IHost Host;
+        private protected new readonly IHost Host;
 
         /// <summary> Ensemble members </summary>
         private protected readonly ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<TOutput>>, IPredictorProducing<TOutput>>[] Trainers;
@@ -67,12 +69,10 @@ namespace Microsoft.ML.Trainers.Ensemble
         private protected ISubModelSelector<TOutput> SubModelSelector;
         private protected IOutputCombiner<TOutput> Combiner;
 
-        public TrainerInfo Info { get; }
+        public override TrainerInfo Info { get; }
 
-        PredictionKind ITrainer.PredictionKind => PredictionKind;
-        private protected abstract PredictionKind PredictionKind { get; }
-
-        private protected EnsembleTrainerBase(ArgumentsBase args, IHostEnvironment env, string name)
+        private protected EnsembleTrainerBase(ArgumentsBase args, IHostEnvironment env, string name, SchemaShape.Column label)
+            : base(Contracts.CheckRef(env, nameof(env)).Register(name), TrainerUtils.MakeR4VecFeature(args.FeatureColumnName), label)
         {
             Contracts.CheckValue(env, nameof(env));
             Host = env.Register(name);

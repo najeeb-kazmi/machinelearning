@@ -20,12 +20,12 @@ namespace Microsoft.ML.Trainers.Ensemble
 
         private protected readonly FeatureSubsetModel<TOutput>[] Models;
         private protected readonly IOutputCombiner<TOutput> Combiner;
-        private protected readonly Single[] Weights;
+        private protected readonly float[] Weights;
 
         private const uint VerOld = 0x00010002;
 
         private protected EnsembleModelParametersBase(IHostEnvironment env, string name, FeatureSubsetModel<TOutput>[] models,
-            IOutputCombiner<TOutput> combiner, Single[] weights)
+            IOutputCombiner<TOutput> combiner, float[] weights)
             : base(env, name)
         {
 

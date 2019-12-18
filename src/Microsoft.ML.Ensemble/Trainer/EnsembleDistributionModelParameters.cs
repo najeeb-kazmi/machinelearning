@@ -18,9 +18,9 @@ using Microsoft.ML.Trainers.Ensemble;
 
 namespace Microsoft.ML.Trainers.Ensemble
 {
-    using TDistPredictor = IDistPredictorProducing<Single, Single>;
+    using TDistPredictor = IDistPredictorProducing<float, float>;
 
-    internal sealed class EnsembleDistributionModelParameters : EnsembleModelParametersBase<Single>,
+    internal sealed class EnsembleDistributionModelParameters : EnsembleModelParametersBase<float>,
          TDistPredictor, IValueMapperDist
     {
         internal const string UserName = "Ensemble Distribution Executor";
@@ -40,7 +40,7 @@ namespace Microsoft.ML.Trainers.Ensemble
                 loaderAssemblyName: typeof(EnsembleDistributionModelParameters).Assembly.FullName);
         }
 
-        private readonly Single[] _averagedWeights;
+        private readonly float[] _averagedWeights;
         private readonly Median _probabilityCombiner;
         private readonly IValueMapperDist[] _mappers;
 
@@ -61,7 +61,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         /// <param name="combiner">The combiner class to use to ensemble the models.</param>
         /// <param name="weights">The weights assigned to each model to be ensembled.</param>
         internal EnsembleDistributionModelParameters(IHostEnvironment env, PredictionKind kind,
-            FeatureSubsetModel<float>[] models, IOutputCombiner<Single> combiner, Single[] weights = null)
+            FeatureSubsetModel<float>[] models, IOutputCombiner<float> combiner, float[] weights = null)
             : base(env, RegistrationName, models, combiner, weights)
         {
             PredictionKind = kind;
@@ -139,16 +139,16 @@ namespace Microsoft.ML.Trainers.Ensemble
 
         ValueMapper<TIn, TOut> IValueMapper.GetMapper<TIn, TOut>()
         {
-            Host.Check(typeof(TIn) == typeof(VBuffer<Single>));
-            Host.Check(typeof(TOut) == typeof(Single));
+            Host.Check(typeof(TIn) == typeof(VBuffer<float>));
+            Host.Check(typeof(TOut) == typeof(float));
 
             var combine = Combiner.GetCombiner();
             var maps = GetMaps();
-            var predictions = new Single[_mappers.Length];
-            var probabilities = new Single[_mappers.Length];
-            var vBuffers = new VBuffer<Single>[_mappers.Length];
-            ValueMapper<VBuffer<Single>, Single> del =
-                (in VBuffer<Single> src, ref Single dst) =>
+            var predictions = new float[_mappers.Length];
+            var probabilities = new float[_mappers.Length];
+            var vBuffers = new VBuffer<float>[_mappers.Length];
+            ValueMapper<VBuffer<float>, float> del =
+                (in VBuffer<float> src, ref float dst) =>
                 {
                     if (_inputType.Size > 0)
                         Host.Check(src.Length == _inputType.Size);
@@ -175,18 +175,18 @@ namespace Microsoft.ML.Trainers.Ensemble
 
         ValueMapper<TIn, TOut, TDist> IValueMapperDist.GetMapper<TIn, TOut, TDist>()
         {
-            Host.Check(typeof(TIn) == typeof(VBuffer<Single>));
-            Host.Check(typeof(TOut) == typeof(Single));
-            Host.Check(typeof(TDist) == typeof(Single));
+            Host.Check(typeof(TIn) == typeof(VBuffer<float>));
+            Host.Check(typeof(TOut) == typeof(float));
+            Host.Check(typeof(TDist) == typeof(float));
 
             var combine = Combiner.GetCombiner();
             var combineProb = _probabilityCombiner.GetCombiner();
             var maps = GetMaps();
-            var predictions = new Single[_mappers.Length];
-            var probabilities = new Single[_mappers.Length];
-            var vBuffers = new VBuffer<Single>[_mappers.Length];
-            ValueMapper<VBuffer<Single>, Single, Single> del =
-                (in VBuffer<Single> src, ref Single score, ref Single prob) =>
+            var predictions = new float[_mappers.Length];
+            var probabilities = new float[_mappers.Length];
+            var vBuffers = new VBuffer<float>[_mappers.Length];
+            ValueMapper<VBuffer<float>, float, float> del =
+                (in VBuffer<float> src, ref float score, ref float prob) =>
                 {
                     if (_inputType.Size > 0)
                         Host.Check(src.Length == _inputType.Size);
@@ -211,17 +211,17 @@ namespace Microsoft.ML.Trainers.Ensemble
             return (ValueMapper<TIn, TOut, TDist>)(Delegate)del;
         }
 
-        private ValueMapper<VBuffer<Single>, Single, Single>[] GetMaps()
+        private ValueMapper<VBuffer<float>, float, float>[] GetMaps()
         {
             Host.AssertValue(_mappers);
 
-            var maps = new ValueMapper<VBuffer<Single>, Single, Single>[_mappers.Length];
+            var maps = new ValueMapper<VBuffer<float>, float, float>[_mappers.Length];
             for (int i = 0; i < _mappers.Length; i++)
-                maps[i] = _mappers[i].GetMapper<VBuffer<Single>, Single, Single>();
+                maps[i] = _mappers[i].GetMapper<VBuffer<float>, float, float>();
             return maps;
         }
 
-        private void ComputeAveragedWeights(out Single[] averagedWeights)
+        private void ComputeAveragedWeights(out float[] averagedWeights)
         {
             averagedWeights = Weights;
             if (Combiner is IWeightedAverager weightedAverager && averagedWeights == null && Models[0].Metrics != null)

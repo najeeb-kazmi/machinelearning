@@ -55,7 +55,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         /// <param name="combiner">The combiner class to use to ensemble the models.</param>
         /// <param name="weights">The weights assigned to each model to be ensembled.</param>
         internal EnsembleModelParameters(IHostEnvironment env, PredictionKind kind,
-            FeatureSubsetModel<float>[] models, IOutputCombiner<Single> combiner, Single[] weights = null)
+            FeatureSubsetModel<float>[] models, IOutputCombiner<float> combiner, float[] weights = null)
             : base(env, LoaderSignature, models, combiner, weights)
         {
             PredictionKind = kind;
