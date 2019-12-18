@@ -9,7 +9,7 @@ using Microsoft.ML.Runtime;
 
 namespace Microsoft.ML.Trainers.Ensemble
 {
-    internal abstract class BaseScalarStacking : BaseStacking<Single>
+    internal abstract class BaseScalarStacking : BaseStacking<float>
     {
         internal BaseScalarStacking(IHostEnvironment env, string name, ArgumentsBase args)
             : base(env, name, args)
@@ -21,7 +21,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         {
         }
 
-        protected override void FillFeatureBuffer(Single[] src, ref VBuffer<Single> dst)
+        protected override void FillFeatureBuffer(float[] src, ref VBuffer<float> dst)
         {
             Contracts.AssertNonEmpty(src);
             int len = src.Length;

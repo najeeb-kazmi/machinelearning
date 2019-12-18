@@ -46,7 +46,7 @@ namespace Microsoft.ML.Trainers.Ensemble.SubsetSelector
             // REVIEW: This won't be very efficient when Size is large.
             for (int i = 0; i < Size; i++)
             {
-                var viewTrain = new RangeFilter(Host, new RangeFilter.Options() { Column = name, Min = (Double)i / Size, Max = (Double)(i + 1) / Size }, view);
+                var viewTrain = new RangeFilter(Host, new RangeFilter.Options() { Column = name, Min = (double)i / Size, Max = (double)(i + 1) / Size }, view);
                 var dataTrain = new RoleMappedData(viewTrain, Data.Schema.GetColumnRoleNames());
                 yield return FeatureSelector.SelectFeatures(dataTrain, rand);
             }

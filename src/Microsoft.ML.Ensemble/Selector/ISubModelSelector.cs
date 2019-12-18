@@ -20,15 +20,15 @@ namespace Microsoft.ML.Trainers.Ensemble
         Single ValidationDatasetProportion { get; }
     }
 
-    internal interface IRegressionSubModelSelector : ISubModelSelector<Single>
+    internal interface IRegressionSubModelSelector : ISubModelSelector<float>
     {
     }
 
-    internal interface IBinarySubModelSelector : ISubModelSelector<Single>
+    internal interface IBinarySubModelSelector : ISubModelSelector<float>
     {
     }
 
-    internal interface IMulticlassSubModelSelector : ISubModelSelector<VBuffer<Single>>
+    internal interface IMulticlassSubModelSelector : ISubModelSelector<VBuffer<float>>
     {
     }
 

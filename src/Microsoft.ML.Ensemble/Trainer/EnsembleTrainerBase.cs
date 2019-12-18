@@ -60,7 +60,6 @@ namespace Microsoft.ML.Trainers.Ensemble
         /// <summary> Command-line arguments </summary>
         private protected readonly ArgumentsBase Args;
         private protected readonly int NumModels;
-        private protected new readonly IHost Host;
 
         /// <summary> Ensemble members </summary>
         private protected readonly ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<TOutput>>, IPredictorProducing<TOutput>>[] Trainers;
@@ -69,13 +68,14 @@ namespace Microsoft.ML.Trainers.Ensemble
         private protected ISubModelSelector<TOutput> SubModelSelector;
         private protected IOutputCombiner<TOutput> Combiner;
 
+        private protected List<FeatureSubsetModel<TOutput>> Models;
+
         public override TrainerInfo Info { get; }
 
         private protected EnsembleTrainerBase(ArgumentsBase args, IHostEnvironment env, string name, SchemaShape.Column label)
             : base(Contracts.CheckRef(env, nameof(env)).Register(name), TrainerUtils.MakeR4VecFeature(args.FeatureColumnName), label)
         {
             Contracts.CheckValue(env, nameof(env));
-            Host = env.Register(name);
 
             Args = args;
 
@@ -94,6 +94,8 @@ namespace Microsoft.ML.Trainers.Ensemble
 
                 _subsetSelector = Args.SamplingType.CreateComponent(Host);
 
+                Models = new List<FeatureSubsetModel<TOutput>>();
+
                 Trainers = new ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<TOutput>>, IPredictorProducing<TOutput>>[NumModels];
                 for (int i = 0; i < Trainers.Length; i++)
                     Trainers[i] = predictorFactories[i % predictorFactories.Length].CreateComponent(Host);
@@ -105,20 +107,24 @@ namespace Microsoft.ML.Trainers.Ensemble
             }
         }
 
-        IPredictor ITrainer<IPredictor>.Train(TrainContext context)
+        private protected override TModel TrainModelCore(TrainContext context)
         {
-            Host.CheckValue(context, nameof(context));
+            Contracts.CheckValue(context, nameof(context));
+
+            var data = context.TrainingSet;
+            data.CheckFeatureFloatVector(out int NumFeatures);
+            CheckLabel(data);
 
             using (var ch = Host.Start("Training"))
             {
-                return TrainCore(ch, context.TrainingSet);
+                TrainCore(ch, data);
+                return CreatePredictor();
             }
         }
 
-        IPredictor ITrainer.Train(TrainContext context)
-            => ((ITrainer<IPredictor>)this).Train(context);
+        private protected abstract void CheckLabel(RoleMappedData data);
 
-        private IPredictor TrainCore(IChannel ch, RoleMappedData data)
+        private protected virtual void TrainCore(IChannel ch, RoleMappedData data)
         {
             Host.AssertValue(ch);
             ch.AssertValue(data);
@@ -181,16 +187,15 @@ namespace Microsoft.ML.Trainers.Ensemble
                 if (stackingTrainer != null)
                     stackingTrainer.Train(modelsList, _subsetSelector.GetTestData(null, batch), Host);
 
-                models.AddRange(modelsList);
-                int modelSize = Utils.Size(models);
+                Models.AddRange(modelsList);
+                int modelSize = Utils.Size(Models);
                 if (modelSize < Utils.Size(Trainers))
                     ch.Warning("{0} of {1} trainings failed.", Utils.Size(Trainers) - modelSize, Utils.Size(Trainers));
                 ch.Check(modelSize > 0, "Ensemble training resulted in no valid models.");
             }
-            return CreatePredictor(models);
         }
 
-        private protected abstract IPredictor CreatePredictor(List<FeatureSubsetModel<TOutput>> models);
+        private protected abstract TModel CreatePredictor();
 
         private bool EnsureMinimumFeaturesSelected(Subset subset)
         {

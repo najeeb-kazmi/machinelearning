@@ -45,7 +45,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             // int: sizeof(Single)
             // bool: _normalize
             int cbFloat = ctx.Reader.ReadInt32();
-            Host.CheckDecode(cbFloat == sizeof(Single));
+            Host.CheckDecode(cbFloat == sizeof(float));
             Normalize = ctx.Reader.ReadBoolByte();
         }
 
@@ -61,13 +61,13 @@ namespace Microsoft.ML.Trainers.Ensemble
             // *** Binary format ***
             // int: sizeof(Single)
             // bool: _normalize
-            ctx.Writer.Write(sizeof(Single));
+            ctx.Writer.Write(sizeof(float));
             ctx.Writer.WriteBoolByte(Normalize);
         }
 
-        public abstract Combiner<VBuffer<Single>> GetCombiner();
+        public abstract Combiner<VBuffer<float>> GetCombiner();
 
-        protected int GetClassCount(VBuffer<Single>[] values)
+        protected int GetClassCount(VBuffer<float>[] values)
         {
             int len = 0;
             foreach (var item in values)
@@ -78,7 +78,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             return len;
         }
 
-        protected bool TryNormalize(VBuffer<Single>[] values)
+        protected bool TryNormalize(VBuffer<float>[] values)
         {
             if (!Normalize)
                 return true;
@@ -95,12 +95,12 @@ namespace Microsoft.ML.Trainers.Ensemble
             return true;
         }
 
-        protected void GetNaNOutput(ref VBuffer<Single> dst, int len)
+        protected void GetNaNOutput(ref VBuffer<float> dst, int len)
         {
             Contracts.Assert(len >= 0);
             var editor = VBufferEditor.Create(ref dst, len);
             for (int i = 0; i < len; i++)
-                editor.Values[i] = Single.NaN;
+                editor.Values[i] = float.NaN;
             dst = editor.Commit();
         }
     }

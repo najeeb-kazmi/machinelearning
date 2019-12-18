@@ -19,11 +19,11 @@ namespace Microsoft.ML.Trainers.Ensemble
 
     internal delegate void SignatureEnsembleDiversityMeasure();
 
-    internal interface IBinaryDiversityMeasure : IDiversityMeasure<Single>
+    internal interface IBinaryDiversityMeasure : IDiversityMeasure<float>
     { }
-    internal interface IRegressionDiversityMeasure : IDiversityMeasure<Single>
+    internal interface IRegressionDiversityMeasure : IDiversityMeasure<float>
     { }
-    internal interface IMulticlassDiversityMeasure : IDiversityMeasure<VBuffer<Single>>
+    internal interface IMulticlassDiversityMeasure : IDiversityMeasure<VBuffer<float>>
     { }
 
     [TlcModule.ComponentKind("EnsembleBinaryDiversityMeasure")]

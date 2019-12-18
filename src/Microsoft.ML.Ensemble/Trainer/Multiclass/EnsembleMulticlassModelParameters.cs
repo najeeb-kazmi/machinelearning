@@ -14,7 +14,7 @@ using Microsoft.ML.Trainers.Ensemble;
 
 namespace Microsoft.ML.Trainers.Ensemble
 {
-    internal sealed class EnsembleMulticlassModelParameters : EnsembleModelParametersBase<VBuffer<Single>>, IValueMapper
+    internal sealed class EnsembleMulticlassModelParameters : EnsembleModelParametersBase<VBuffer<float>>, IValueMapper
     {
         internal const string UserName = "Ensemble Multiclass Executor";
         internal const string LoaderSignature = "EnsemMcExec";
@@ -48,7 +48,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         /// <param name="combiner">The combiner class to use to ensemble the models.</param>
         /// <param name="weights">The weights assigned to each model to be ensembled.</param>
         internal EnsembleMulticlassModelParameters(IHostEnvironment env, FeatureSubsetModel<VBuffer<float>>[] models,
-            IMulticlassOutputCombiner combiner, Single[] weights = null)
+            IMulticlassOutputCombiner combiner, float[] weights = null)
             : base(env, RegistrationName, models, combiner, weights)
         {
             InitializeMappers(out _mappers, out _inputType, out _outputType);
@@ -109,23 +109,23 @@ namespace Microsoft.ML.Trainers.Ensemble
 
         ValueMapper<TIn, TOut> IValueMapper.GetMapper<TIn, TOut>()
         {
-            Host.Check(typeof(TIn) == typeof(VBuffer<Single>));
-            Host.Check(typeof(TOut) == typeof(VBuffer<Single>));
+            Host.Check(typeof(TIn) == typeof(VBuffer<float>));
+            Host.Check(typeof(TOut) == typeof(VBuffer<float>));
 
             var combine = Combiner.GetCombiner();
-            var features = new VBuffer<Single>[_mappers.Length];
-            var predictions = new VBuffer<Single>[_mappers.Length];
-            var maps = new ValueMapper<VBuffer<Single>, VBuffer<Single>>[_mappers.Length];
+            var features = new VBuffer<float>[_mappers.Length];
+            var predictions = new VBuffer<float>[_mappers.Length];
+            var maps = new ValueMapper<VBuffer<float>, VBuffer<float>>[_mappers.Length];
             for (int i = 0; i < _mappers.Length; i++)
             {
                 // IsValid method ensures we go this else path only if the OutputType.VectorSize of
                 // all _mappers is greater than zero
                 Host.Assert(_mappers[i].OutputType.GetVectorSize() > 0);
-                maps[i] = _mappers[i].GetMapper<VBuffer<Single>, VBuffer<Single>>();
+                maps[i] = _mappers[i].GetMapper<VBuffer<float>, VBuffer<float>>();
             }
 
-            ValueMapper<VBuffer<Single>, VBuffer<Single>> del =
-                (in VBuffer<Single> src, ref VBuffer<Single> dst) =>
+            ValueMapper<VBuffer<float>, VBuffer<float>> del =
+                (in VBuffer<float> src, ref VBuffer<float> dst) =>
                 {
                     if (_inputType.Size > 0)
                         Host.Check(src.Length == _inputType.Size);

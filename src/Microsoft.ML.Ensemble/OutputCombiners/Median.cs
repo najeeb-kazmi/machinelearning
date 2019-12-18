@@ -48,7 +48,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             // *** Binary format ***
             // int: sizeof(Single)
             int cbFloat = ctx.Reader.ReadInt32();
-            _host.CheckDecode(cbFloat == sizeof(Single));
+            _host.CheckDecode(cbFloat == sizeof(float));
         }
 
         public static Median Create(IHostEnvironment env, ModelLoadContext ctx)
@@ -67,15 +67,15 @@ namespace Microsoft.ML.Trainers.Ensemble
 
             // *** Binary format ***
             // int: sizeof(Float)
-            ctx.Writer.Write(sizeof(Single));
+            ctx.Writer.Write(sizeof(float));
         }
 
-        public Combiner<Single> GetCombiner()
+        public Combiner<float> GetCombiner()
         {
             return CombineCore;
         }
 
-        private void CombineCore(ref Single dst, Single[] src, Single[] weights)
+        private void CombineCore(ref float dst, float[] src, float[] weights)
         {
             // REVIEW: This mutates "src". We need to ensure that the documentation of
             // combiners makes it clear that combiners are allowed to do this. Note that "normalization"

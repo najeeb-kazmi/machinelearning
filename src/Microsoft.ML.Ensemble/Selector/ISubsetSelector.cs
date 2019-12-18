@@ -12,7 +12,7 @@ namespace Microsoft.ML.Trainers.Ensemble
 {
     internal interface ISubsetSelector
     {
-        void Initialize(RoleMappedData data, int size, int batchSize, Single validationDatasetProportion);
+        void Initialize(RoleMappedData data, int size, int batchSize, float validationDatasetProportion);
         IEnumerable<Batch> GetBatches(Random rand);
         IEnumerable<Subset> GetSubsets(Batch batch, Random rand);
         RoleMappedData GetTestData(Subset subset, Batch batch);

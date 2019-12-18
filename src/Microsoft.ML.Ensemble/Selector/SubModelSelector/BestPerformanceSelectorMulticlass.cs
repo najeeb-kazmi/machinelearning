@@ -16,7 +16,7 @@ using Microsoft.ML.Trainers.Ensemble;
 
 namespace Microsoft.ML.Trainers.Ensemble
 {
-    internal sealed class BestPerformanceSelectorMulticlass : BaseBestPerformanceSelector<VBuffer<Single>>, IMulticlassSubModelSelector
+    internal sealed class BestPerformanceSelectorMulticlass : BaseBestPerformanceSelector<VBuffer<float>>, IMulticlassSubModelSelector
     {
         [TlcModule.Component(Name = LoadName, FriendlyName = UserName)]
         public sealed class Arguments : ArgumentsBase, ISupportMulticlassSubModelSelectorFactory

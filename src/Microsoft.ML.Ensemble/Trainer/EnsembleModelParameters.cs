@@ -20,7 +20,7 @@ namespace Microsoft.ML.Trainers.Ensemble
     /// <summary>
     /// A class for artifacts of ensembled models.
     /// </summary>
-    internal sealed class EnsembleModelParameters : EnsembleModelParametersBase<Single>, IValueMapper
+    internal sealed class EnsembleModelParameters : EnsembleModelParametersBase<float>, IValueMapper
     {
         internal const string UserName = "Ensemble Executor";
         internal const string LoaderSignature = "EnsembleFloatExec";
@@ -129,18 +129,18 @@ namespace Microsoft.ML.Trainers.Ensemble
 
         ValueMapper<TIn, TOut> IValueMapper.GetMapper<TIn, TOut>()
         {
-            Host.Check(typeof(TIn) == typeof(VBuffer<Single>));
-            Host.Check(typeof(TOut) == typeof(Single));
+            Host.Check(typeof(TIn) == typeof(VBuffer<float>));
+            Host.Check(typeof(TOut) == typeof(float));
 
             var combine = Combiner.GetCombiner();
-            var predictions = new Single[_mappers.Length];
-            var buffers = new VBuffer<Single>[_mappers.Length];
-            var maps = new ValueMapper<VBuffer<Single>, Single>[_mappers.Length];
+            var predictions = new float[_mappers.Length];
+            var buffers = new VBuffer<float>[_mappers.Length];
+            var maps = new ValueMapper<VBuffer<float>, float>[_mappers.Length];
             for (int i = 0; i < _mappers.Length; i++)
-                maps[i] = _mappers[i].GetMapper<VBuffer<Single>, Single>();
+                maps[i] = _mappers[i].GetMapper<VBuffer<float>, float>();
 
-            ValueMapper<VBuffer<Single>, Single> del =
-                (in VBuffer<Single> src, ref Single dst) =>
+            ValueMapper<VBuffer<float>, float> del =
+                (in VBuffer<float> src, ref float dst) =>
                 {
                     if (_inputType.Size > 0)
                         Host.Check(src.Length == _inputType.Size);

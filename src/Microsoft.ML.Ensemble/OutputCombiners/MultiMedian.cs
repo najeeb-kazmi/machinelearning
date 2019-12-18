@@ -65,11 +65,11 @@ namespace Microsoft.ML.Trainers.Ensemble
             ctx.SetVersionInfo(GetVersionInfo());
         }
 
-        public override Combiner<VBuffer<Single>> GetCombiner()
+        public override Combiner<VBuffer<float>> GetCombiner()
         {
-            Single[] raw = null;
+            float[] raw = null;
             return
-                (ref VBuffer<Single> dst, VBuffer<Single>[] src, Single[] weights) =>
+                (ref VBuffer<float> dst, VBuffer<float>[] src, float[] weights) =>
                 {
                     Host.AssertNonEmpty(src);
                     Host.Assert(weights == null || Utils.Size(weights) == Utils.Size(src));
@@ -85,7 +85,7 @@ namespace Microsoft.ML.Trainers.Ensemble
 
                     int count = src.Length;
                     if (Utils.Size(raw) < count)
-                        raw = new Single[count];
+                        raw = new float[count];
                     for (int i = 0; i < len; i++)
                     {
                         for (int j = 0; j < count; j++)

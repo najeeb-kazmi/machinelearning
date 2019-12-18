@@ -22,7 +22,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         {
         }
 
-        protected void CombineCore(ref VBuffer<Single> dst, VBuffer<Single>[] src, Single[] weights = null)
+        protected void CombineCore(ref VBuffer<float> dst, VBuffer<float>[] src, float[] weights = null)
         {
             Host.AssertNonEmpty(src);
             Host.Assert(weights == null || Utils.Size(weights) == Utils.Size(src));
@@ -41,7 +41,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             // Set the output to values.
             dst = editor.Commit();
 
-            Single weightTotal;
+            float weightTotal;
             if (weights == null)
             {
                 weightTotal = src.Length;

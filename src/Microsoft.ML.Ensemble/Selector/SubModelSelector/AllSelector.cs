@@ -11,12 +11,12 @@ using Microsoft.ML.Trainers.Ensemble;
 
 namespace Microsoft.ML.Trainers.Ensemble
 {
-    internal sealed class AllSelector : BaseSubModelSelector<Single>, IBinarySubModelSelector, IRegressionSubModelSelector
+    internal sealed class AllSelector : BaseSubModelSelector<float>, IBinarySubModelSelector, IRegressionSubModelSelector
     {
         public const string UserName = "All Selector";
         public const string LoadName = "AllSelector";
 
-        public override Single ValidationDatasetProportion => 0;
+        public override float ValidationDatasetProportion => 0;
 
         protected override PredictionKind PredictionKind => PredictionKind.BinaryClassification;
 

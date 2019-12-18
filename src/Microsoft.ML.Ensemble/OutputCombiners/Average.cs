@@ -53,10 +53,10 @@ namespace Microsoft.ML.Trainers.Ensemble
             ctx.SetVersionInfo(GetVersionInfo());
         }
 
-        public override Combiner<Single> GetCombiner()
+        public override Combiner<float> GetCombiner()
         {
             // Force the weights to null.
-            return (ref Single dst, Single[] src, Single[] weights) =>
+            return (ref float dst, float[] src, float[] weights) =>
                      CombineCore(ref dst, src, null);
         }
     }

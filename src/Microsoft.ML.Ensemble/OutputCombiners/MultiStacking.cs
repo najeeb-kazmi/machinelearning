@@ -21,7 +21,7 @@ namespace Microsoft.ML.Trainers.Ensemble
 {
     using TVectorTrainer = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<VBuffer<float>>>, IPredictorProducing<VBuffer<float>>>;
 
-    internal sealed class MultiStacking : BaseStacking<VBuffer<Single>>, IMulticlassOutputCombiner
+    internal sealed class MultiStacking : BaseStacking<VBuffer<float>>, IMulticlassOutputCombiner
     {
         public const string LoadName = "MultiStacking";
         public const string LoaderSignature = "MultiStackingCombiner";
@@ -77,7 +77,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             ctx.SetVersionInfo(GetVersionInfo());
         }
 
-        protected override void FillFeatureBuffer(VBuffer<Single>[] src, ref VBuffer<Single> dst)
+        protected override void FillFeatureBuffer(VBuffer<float>[] src, ref VBuffer<float> dst)
         {
             Contracts.AssertNonEmpty(src);
 

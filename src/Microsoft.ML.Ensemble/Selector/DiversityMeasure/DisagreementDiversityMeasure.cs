@@ -11,12 +11,12 @@ using Microsoft.ML.Trainers.Ensemble;
 
 namespace Microsoft.ML.Trainers.Ensemble
 {
-    internal sealed class DisagreementDiversityMeasure : BaseDisagreementDiversityMeasure<Single>, IBinaryDiversityMeasure
+    internal sealed class DisagreementDiversityMeasure : BaseDisagreementDiversityMeasure<float>, IBinaryDiversityMeasure
     {
         public const string UserName = "Disagreement Diversity Measure";
         public const string LoadName = "DisagreementDiversityMeasure";
 
-        protected override Single GetDifference(in Single valueX, in Single valueY)
+        protected override float GetDifference(in float valueX, in float valueY)
         {
             return (valueX > 0 && valueY < 0 || valueX < 0 && valueY > 0) ? 1 : 0;
         }

@@ -10,6 +10,6 @@ namespace Microsoft.ML.Trainers.Ensemble
     {
         public FeatureSubsetModel<TOutput> ModelX { get; set; }
         public FeatureSubsetModel<TOutput> ModelY { get; set; }
-        public Single DiversityNumber { get; set; }
+        public float DiversityNumber { get; set; }
     }
 }

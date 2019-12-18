@@ -17,7 +17,7 @@ using Microsoft.ML.Trainers.Ensemble;
 
 namespace Microsoft.ML.Trainers.Ensemble
 {
-    internal sealed class BestDiverseSelectorRegression : BaseDiverseSelector<Single, RegressionDisagreementDiversityMeasure>, IRegressionSubModelSelector
+    internal sealed class BestDiverseSelectorRegression : BaseDiverseSelector<float, RegressionDisagreementDiversityMeasure>, IRegressionSubModelSelector
     {
         public const string UserName = "Best Diverse Selector";
         public const string LoadName = "BestDiverseSelectorRegression";
@@ -36,8 +36,8 @@ namespace Microsoft.ML.Trainers.Ensemble
         {
         }
 
-        public override List<ModelDiversityMetric<Single>> CalculateDiversityMeasure(IList<FeatureSubsetModel<float>> models,
-            ConcurrentDictionary<FeatureSubsetModel<float>, Single[]> predictions)
+        public override List<ModelDiversityMetric<float>> CalculateDiversityMeasure(IList<FeatureSubsetModel<float>> models,
+            ConcurrentDictionary<FeatureSubsetModel<float>, float[]> predictions)
         {
             var diversityMetric = CreateDiversityMetric();
             return diversityMetric.CalculateDiversityMeasure(models, predictions);

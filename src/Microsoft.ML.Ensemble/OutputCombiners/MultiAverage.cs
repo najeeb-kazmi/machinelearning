@@ -62,11 +62,11 @@ namespace Microsoft.ML.Trainers.Ensemble
             ctx.SetVersionInfo(GetVersionInfo());
         }
 
-        public override Combiner<VBuffer<Single>> GetCombiner()
+        public override Combiner<VBuffer<float>> GetCombiner()
         {
             // Force the weights to null.
             return
-                (ref VBuffer<Single> dst, VBuffer<Single>[] src, Single[] weights) =>
+                (ref VBuffer<float> dst, VBuffer<float>[] src, float[] weights) =>
                     CombineCore(ref dst, src, null);
         }
     }

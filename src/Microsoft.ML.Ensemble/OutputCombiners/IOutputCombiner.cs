@@ -15,7 +15,7 @@ namespace Microsoft.ML.Trainers.Ensemble
     /// </summary>
     internal delegate void SignatureCombiner();
 
-    internal delegate void Combiner<TOutput>(ref TOutput dst, TOutput[] src, Single[] weights);
+    internal delegate void Combiner<TOutput>(ref TOutput dst, TOutput[] src, float[] weights);
 
     internal interface IOutputCombiner
     {
@@ -35,15 +35,15 @@ namespace Microsoft.ML.Trainers.Ensemble
         Single ValidationDatasetProportion { get; }
     }
 
-    internal interface IRegressionOutputCombiner : IOutputCombiner<Single>
+    internal interface IRegressionOutputCombiner : IOutputCombiner<float>
     {
     }
 
-    internal interface IBinaryOutputCombiner : IOutputCombiner<Single>
+    internal interface IBinaryOutputCombiner : IOutputCombiner<float>
     {
     }
 
-    internal interface IMulticlassOutputCombiner : IOutputCombiner<VBuffer<Single>>
+    internal interface IMulticlassOutputCombiner : IOutputCombiner<VBuffer<float>>
     {
     }
 

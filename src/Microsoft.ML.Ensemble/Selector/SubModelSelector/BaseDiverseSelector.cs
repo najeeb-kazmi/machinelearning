@@ -41,7 +41,7 @@ namespace Microsoft.ML.Trainers.Ensemble
 
             var vm = model.Predictor as IValueMapper;
             Host.Check(vm != null, "Predictor doesn't implement the expected interface");
-            var map = vm.GetMapper<VBuffer<Single>, TOutput>();
+            var map = vm.GetMapper<VBuffer<float>, TOutput>();
 
             TOutput[] preds = new TOutput[100];
             int count = 0;

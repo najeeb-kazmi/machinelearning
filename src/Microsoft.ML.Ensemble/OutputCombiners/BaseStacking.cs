@@ -20,7 +20,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             [Argument(ArgumentType.AtMostOnce, ShortName = "vp", SortOrder = 50,
                 HelpText = "The proportion of instances to be selected to test the individual base learner. If it is 0, it uses training set")]
             [TGUI(Label = "Validation Dataset Proportion")]
-            public Single ValidationDatasetProportion = 0.3f;
+            public float ValidationDatasetProportion = 0.3f;
 
             internal abstract IComponentFactory<ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<TOutput>>, IPredictorProducing<TOutput>>> GetPredictorFactory();
         }
@@ -29,7 +29,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         private protected readonly IHost Host;
         private protected IPredictorProducing<TOutput> Meta;
 
-        public Single ValidationDatasetProportion { get; }
+        public float ValidationDatasetProportion { get; }
 
         private protected BaseStacking(IHostEnvironment env, string name, ArgumentsBase args)
         {
@@ -57,7 +57,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             // int: sizeof(Single)
             // Float: _validationDatasetProportion
             int cbFloat = ctx.Reader.ReadInt32();
-            env.CheckDecode(cbFloat == sizeof(Single));
+            env.CheckDecode(cbFloat == sizeof(float));
             ValidationDatasetProportion = ctx.Reader.ReadFloat();
             env.CheckDecode(0 <= ValidationDatasetProportion && ValidationDatasetProportion < 1);
 
@@ -80,7 +80,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             // *** Binary format ***
             // int: sizeof(Single)
             // Float: _validationDatasetProportion
-            ctx.Writer.Write(sizeof(Single));
+            ctx.Writer.Write(sizeof(float));
             ctx.Writer.Write(ValidationDatasetProportion);
 
             ctx.SaveModel(Meta, "MetaPredictor");
@@ -94,11 +94,11 @@ namespace Microsoft.ML.Trainers.Ensemble
             // since generally ValueMappers cannot be assumed to be thread safe - they often
             // capture buffers needed for efficient operation.
             var mapper = (IValueMapper)Meta;
-            var map = mapper.GetMapper<VBuffer<Single>, TOutput>();
+            var map = mapper.GetMapper<VBuffer<float>, TOutput>();
 
-            var feat = default(VBuffer<Single>);
+            var feat = default(VBuffer<float>);
             Combiner<TOutput> res =
-                (ref TOutput dst, TOutput[] src, Single[] weights) =>
+                (ref TOutput dst, TOutput[] src, float[] weights) =>
                 {
                     FillFeatureBuffer(src, ref feat);
                     map(in feat, ref dst);
@@ -106,7 +106,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             return res;
         }
 
-        protected abstract void FillFeatureBuffer(TOutput[] src, ref VBuffer<Single> dst);
+        protected abstract void FillFeatureBuffer(TOutput[] src, ref VBuffer<float> dst);
 
         private void CheckMeta()
         {
@@ -132,12 +132,12 @@ namespace Microsoft.ML.Trainers.Ensemble
                 ch.Check(Meta == null, "Train called multiple times");
                 ch.Check(BasePredictorType != null);
 
-                var maps = new ValueMapper<VBuffer<Single>, TOutput>[models.Count];
+                var maps = new ValueMapper<VBuffer<float>, TOutput>[models.Count];
                 for (int i = 0; i < maps.Length; i++)
                 {
                     Contracts.Assert(models[i].Predictor is IValueMapper);
                     var m = (IValueMapper)models[i].Predictor;
-                    maps[i] = m.GetMapper<VBuffer<Single>, TOutput>();
+                    maps[i] = m.GetMapper<VBuffer<float>, TOutput>();
                 }
 
                 var view = CreateDataView(host, ch, data, maps, models);
@@ -149,7 +149,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             }
         }
 
-        private IDataView CreateDataView(IHostEnvironment env, IChannel ch, RoleMappedData data, ValueMapper<VBuffer<Single>,
+        private IDataView CreateDataView(IHostEnvironment env, IChannel ch, RoleMappedData data, ValueMapper<VBuffer<float>,
             TOutput>[] maps, List<FeatureSubsetModel<TOutput>> models)
         {
             switch (data.Schema.Label.Value.Type.GetRawKind())
@@ -166,18 +166,18 @@ namespace Microsoft.ML.Trainers.Ensemble
             }
         }
 
-        private IDataView CreateDataView<T>(IHostEnvironment env, IChannel ch, RoleMappedData data, ValueMapper<VBuffer<Single>, TOutput>[] maps,
+        private IDataView CreateDataView<T>(IHostEnvironment env, IChannel ch, RoleMappedData data, ValueMapper<VBuffer<float>, TOutput>[] maps,
             List<FeatureSubsetModel<TOutput>> models, Func<float, T> labelConvert)
         {
             // REVIEW: Should implement this better....
             var labels = new T[100];
-            var features = new VBuffer<Single>[100];
+            var features = new VBuffer<float>[100];
             int count = 0;
             // REVIEW: Should this include bad values or filter them?
             using (var cursor = new FloatLabelCursor(data, CursOpt.AllFeatures | CursOpt.AllLabels))
             {
                 TOutput[] predictions = new TOutput[maps.Length];
-                var vBuffers = new VBuffer<Single>[maps.Length];
+                var vBuffers = new VBuffer<float>[maps.Length];
                 while (cursor.MoveNext())
                 {
                     Parallel.For(0, maps.Length, i =>

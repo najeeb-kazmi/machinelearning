@@ -159,7 +159,7 @@ namespace Microsoft.ML.Trainers.Ensemble
                     return scoreGetter;
                 }
 
-                public ValueGetter<Single> GetLabelGetter(DataViewRow input, int i, out Action disposer)
+                public ValueGetter<float> GetLabelGetter(DataViewRow input, int i, out Action disposer)
                 {
                     Parent.Host.Assert(0 <= i && i < Mappers.Length);
                     Parent.Host.Check(Mappers[i].InputRoleMappedSchema.Label.HasValue, "Mapper was not trained using a label column");
@@ -171,13 +171,13 @@ namespace Microsoft.ML.Trainers.Ensemble
                     return RowCursorUtils.GetLabelGetter(pipelineRow, labelCol.Index);
                 }
 
-                public ValueGetter<Single> GetWeightGetter(DataViewRow input, int i, out Action disposer)
+                public ValueGetter<float> GetWeightGetter(DataViewRow input, int i, out Action disposer)
                 {
                     Parent.Host.Assert(0 <= i && i < Mappers.Length);
 
                     if (!Mappers[i].InputRoleMappedSchema.Weight.HasValue)
                     {
-                        ValueGetter<Single> weight = (ref float dst) => dst = 1;
+                        ValueGetter<float> weight = (ref float dst) => dst = 1;
                         disposer = null;
                         return weight;
                     }
@@ -229,7 +229,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         }
 
         // This is an implementation of pipeline ensembles that combines scores of type float (regression and anomaly detection).
-        private sealed class ImplOne : SchemaBindablePipelineEnsemble<Single>
+        private sealed class ImplOne : SchemaBindablePipelineEnsemble<float>
         {
             protected override DataViewType ScoreType => NumberDataViewType.Single;
 
@@ -257,7 +257,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         }
 
         // This is an implementation of pipeline ensemble that combines scores of type vectors of float (multi-class).
-        private sealed class ImplVec : SchemaBindablePipelineEnsemble<VBuffer<Single>>
+        private sealed class ImplVec : SchemaBindablePipelineEnsemble<VBuffer<float>>
         {
             protected override DataViewType ScoreType { get { return _scoreType; } }
 
@@ -289,7 +289,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         }
 
         // This is an implementation of pipeline ensembles that combines scores of type float, and also provides calibration (for binary classification).
-        private sealed class ImplOneWithCalibrator : SchemaBindablePipelineEnsemble<Single>, ISelfCalibratingPredictor
+        private sealed class ImplOneWithCalibrator : SchemaBindablePipelineEnsemble<float>, ISelfCalibratingPredictor
         {
             protected override DataViewType ScoreType { get { return NumberDataViewType.Single; } }
 
@@ -330,7 +330,7 @@ namespace Microsoft.ML.Trainers.Ensemble
                     var bound = new Bound(this, new RoleMappedSchema(data.Schema));
                     using (var curs = data.GetRowCursorForAllColumns())
                     {
-                        var scoreGetter = (ValueGetter<Single>)bound.CreateScoreGetter(curs, out Action disposer);
+                        var scoreGetter = (ValueGetter<float>)bound.CreateScoreGetter(curs, out Action disposer);
 
                         // We assume that we can use the label column of the first predictor, since if the labels are not identical
                         // then the whole model is garbage anyway.
@@ -343,15 +343,15 @@ namespace Microsoft.ML.Trainers.Ensemble
                             int num = 0;
                             while (curs.MoveNext())
                             {
-                                Single label = 0;
+                                float label = 0;
                                 labelGetter(ref label);
                                 if (!FloatUtils.IsFinite(label))
                                     continue;
-                                Single score = 0;
+                                float score = 0;
                                 scoreGetter(ref score);
                                 if (!FloatUtils.IsFinite(score))
                                     continue;
-                                Single weight = 0;
+                                float weight = 0;
                                 weightGetter(ref weight);
                                 if (!FloatUtils.IsFinite(weight))
                                     continue;

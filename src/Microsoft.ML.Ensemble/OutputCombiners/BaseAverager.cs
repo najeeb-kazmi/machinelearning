@@ -27,7 +27,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             // *** Binary format ***
             // int: sizeof(Single)
             int cbFloat = ctx.Reader.ReadInt32();
-            Host.CheckDecode(cbFloat == sizeof(Single));
+            Host.CheckDecode(cbFloat == sizeof(float));
         }
 
         void ICanSaveModel.Save(ModelSaveContext ctx)
@@ -41,20 +41,20 @@ namespace Microsoft.ML.Trainers.Ensemble
         {
             // *** Binary format ***
             // int: sizeof(Single)
-            ctx.Writer.Write(sizeof(Single));
+            ctx.Writer.Write(sizeof(float));
         }
 
-        public abstract Combiner<Single> GetCombiner();
+        public abstract Combiner<float> GetCombiner();
 
-        protected void CombineCore(ref Single dst, Single[] src, Single[] weights = null)
+        protected void CombineCore(ref float dst, float[] src, float[] weights = null)
         {
-            Single sum = 0;
-            Single weightTotal = 0;
+            float sum = 0;
+            float weightTotal = 0;
             if (weights == null)
             {
                 for (int i = 0; i < src.Length; i++)
                 {
-                    if (!Single.IsNaN(src[i]))
+                    if (!float.IsNaN(src[i]))
                     {
                         sum += src[i];
                         weightTotal++;
@@ -65,7 +65,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             {
                 for (int i = 0; i < src.Length; i++)
                 {
-                    if (!Single.IsNaN(src[i]))
+                    if (!float.IsNaN(src[i]))
                     {
                         sum += weights[i] * src[i];
                         weightTotal += weights[i];

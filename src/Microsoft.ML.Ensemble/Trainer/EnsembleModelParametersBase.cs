@@ -117,7 +117,7 @@ namespace Microsoft.ML.Trainers.Ensemble
                 for (int j = 0; j < numMetrics; j++)
                 {
                     var metric = model.Metrics[j];
-                    ctx.Writer.Write((Single)metric.Value);
+                    ctx.Writer.Write((float)metric.Value);
                     ctx.SaveStringOrNull(metric.Key);
                 }
             }

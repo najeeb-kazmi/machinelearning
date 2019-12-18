@@ -16,17 +16,17 @@ namespace Microsoft.ML.Trainers.Ensemble
             [Argument(ArgumentType.AtMostOnce, ShortName = "lp", SortOrder = 50,
                 HelpText = "The proportion of best base learners to be selected. The range is 0.0-1.0")]
             [TGUI(Label = "Learners Selection Proportion")]
-            public Single LearnersSelectionProportion = 0.5f;
+            public float LearnersSelectionProportion = 0.5f;
 
             [Argument(ArgumentType.AtMostOnce, ShortName = "vp", SortOrder = 50,
                 HelpText = "The proportion of instances to be selected to test the individual base learner. If it is 0, it uses training set")]
             [TGUI(Label = "Validation Dataset Proportion")]
-            public Single ValidationDatasetProportion = 0.3f;
+            public float ValidationDatasetProportion = 0.3f;
         }
 
-        public Single LearnersSelectionProportion { get; }
+        public float LearnersSelectionProportion { get; }
 
-        public override Single ValidationDatasetProportion { get; }
+        public override float ValidationDatasetProportion { get; }
 
         protected SubModelDataSelector(ArgumentsBase args, IHostEnvironment env, string name)
             : base(env, name)

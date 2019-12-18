@@ -64,12 +64,12 @@ namespace Microsoft.ML.Trainers.Ensemble
             ctx.SetVersionInfo(GetVersionInfo());
         }
 
-        public override Combiner<VBuffer<Single>> GetCombiner()
+        public override Combiner<VBuffer<float>> GetCombiner()
         {
             return CombineCore;
         }
 
-        private void CombineCore(ref VBuffer<Single> dst, VBuffer<Single>[] src, Single[] weights = null)
+        private void CombineCore(ref VBuffer<float> dst, VBuffer<float>[] src, float[] weights = null)
         {
             Host.AssertNonEmpty(src);
             Host.Assert(weights == null || Utils.Size(weights) == Utils.Size(src));

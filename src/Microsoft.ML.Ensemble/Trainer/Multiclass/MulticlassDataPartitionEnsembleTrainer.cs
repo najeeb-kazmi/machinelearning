@@ -23,14 +23,14 @@ using Microsoft.ML.Trainers.Ensemble;
 
 namespace Microsoft.ML.Trainers.Ensemble
 {
-    using TVectorPredictor = IPredictorProducing<VBuffer<Single>>;
+    using TVectorPredictor = IPredictorProducing<VBuffer<float>>;
     using TVectorTrainer = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<VBuffer<float>>>, IPredictorProducing<VBuffer<float>>>;
 
     /// <summary>
     /// A generic ensemble classifier for multi-class classification
     /// </summary>
     internal sealed class MulticlassDataPartitionEnsembleTrainer :
-        EnsembleTrainerBase<VBuffer<Single>,
+        EnsembleTrainerBase<VBuffer<float>,
         IMulticlassSubModelSelector, IMulticlassOutputCombiner>,
         IModelCombiner
     {

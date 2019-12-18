@@ -23,7 +23,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             {
                 for (int j = i + 1; j < models.Count; j++)
                 {
-                    Single differencesCount = 0;
+                    float differencesCount = 0;
                     var modelXOutputs = predictions[models[i]];
                     var modelYOutputs = predictions[models[j]];
                     for (int k = 0; k < modelXOutputs.Length; k++)
@@ -41,6 +41,6 @@ namespace Microsoft.ML.Trainers.Ensemble
             return diversityValues;
         }
 
-        protected abstract Single GetDifference(in TOutput tOutput1, in TOutput tOutput2);
+        protected abstract float GetDifference(in TOutput tOutput1, in TOutput tOutput2);
     }
 }

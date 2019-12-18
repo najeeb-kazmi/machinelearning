@@ -13,11 +13,11 @@ using Microsoft.ML.Trainers.Ensemble;
 
 namespace Microsoft.ML.Trainers.Ensemble
 {
-    internal sealed class MultiDisagreementDiversityMeasure : BaseDisagreementDiversityMeasure<VBuffer<Single>>, IMulticlassDiversityMeasure
+    internal sealed class MultiDisagreementDiversityMeasure : BaseDisagreementDiversityMeasure<VBuffer<float>>, IMulticlassDiversityMeasure
     {
         public const string LoadName = "MultiDisagreementDiversityMeasure";
 
-        protected override Single GetDifference(in VBuffer<Single> valueX, in VBuffer<Single> valueY)
+        protected override float GetDifference(in VBuffer<float> valueX, in VBuffer<float> valueY)
         {
             return (VectorUtils.ArgMax(in valueX) != VectorUtils.ArgMax(in valueY)) ? 1 : 0;
         }

@@ -16,7 +16,7 @@ using Microsoft.ML.Trainers.Ensemble;
 
 namespace Microsoft.ML.Trainers.Ensemble
 {
-    internal sealed class BestPerformanceRegressionSelector : BaseBestPerformanceSelector<Single>, IRegressionSubModelSelector
+    internal sealed class BestPerformanceRegressionSelector : BaseBestPerformanceSelector<float>, IRegressionSubModelSelector
     {
         [TlcModule.Component(Name = LoadName, FriendlyName = UserName)]
         public sealed class Arguments : ArgumentsBase, ISupportRegressionSubModelSelectorFactory

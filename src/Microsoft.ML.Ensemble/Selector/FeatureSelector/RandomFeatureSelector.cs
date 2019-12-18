@@ -25,7 +25,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         public sealed class Arguments : ISupportFeatureSelectorFactory
         {
             [Argument(ArgumentType.AtMostOnce, HelpText = "The proportion of features to be selected. The range is 0.0-1.0", ShortName = "fp", SortOrder = 50)]
-            public Single FeaturesSelectionProportion = 0.8f;
+            public float FeaturesSelectionProportion = 0.8f;
 
             public IFeatureSelector CreateComponent(IHostEnvironment env) => new RandomFeatureSelector(env, this);
         }

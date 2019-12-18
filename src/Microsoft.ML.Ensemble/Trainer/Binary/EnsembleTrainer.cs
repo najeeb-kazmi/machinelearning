@@ -21,15 +21,15 @@ using Microsoft.ML.Trainers.Ensemble;
 
 namespace Microsoft.ML.Trainers.Ensemble
 {
-    using TDistPredictor = IDistPredictorProducing<Single, Single>;
-    using TScalarPredictor = IPredictorProducing<Single>;
+    using TDistPredictor = IDistPredictorProducing<float, float>;
+    using TScalarPredictor = IPredictorProducing<float>;
     using TScalarTrainer = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<float>>, IPredictorProducing<float>>;
 
     /// <summary>
     /// A generic ensemble trainer for binary classification.
     /// </summary>
-    internal sealed class EnsembleTrainer : EnsembleTrainerBase<Single,
-        IBinarySubModelSelector, IBinaryOutputCombiner>,
+    internal sealed class EnsembleTrainer : EnsembleTrainerBase<float,
+        IBinarySubModelSelector, IBinaryOutputCombiner, BinaryPredictionTransformer<EnsembleModelParametersBase<float>>, EnsembleModelParametersBase<float>>,
         IModelCombiner
     {
         public const string LoadNameValue = "WeightedEnsemble";
@@ -65,7 +65,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         private readonly ISupportBinaryOutputCombinerFactory _outputCombiner;
 
         public EnsembleTrainer(IHostEnvironment env, Arguments args)
-            : base(args, env, LoadNameValue)
+            : base(args, env, LoadNameValue, TrainerUtils.MakeBoolScalarLabel(args.LabelColumnName))
         {
             SubModelSelector = args.SubModelSelectorType.CreateComponent(Host);
             _outputCombiner = args.OutputCombiner;
@@ -80,11 +80,11 @@ namespace Microsoft.ML.Trainers.Ensemble
 
         private protected override PredictionKind PredictionKind => PredictionKind.BinaryClassification;
 
-        private protected override IPredictor CreatePredictor(List<FeatureSubsetModel<float>> models)
+        private protected override EnsembleModelParametersBase<float> CreatePredictor()
         {
-            if (models.All(m => m.Predictor is TDistPredictor))
-                return new EnsembleDistributionModelParameters(Host, PredictionKind, CreateModels<TDistPredictor>(models), Combiner);
-            return new EnsembleModelParameters(Host, PredictionKind, CreateModels<TScalarPredictor>(models), Combiner);
+            if (Models.All(m => m.Predictor is TDistPredictor))
+                return new EnsembleDistributionModelParameters(Host, PredictionKind, CreateModels<TDistPredictor>(Models), Combiner);
+            return new EnsembleModelParameters(Host, PredictionKind, CreateModels<TScalarPredictor>(Models), Combiner);
         }
 
         public IPredictor CombineModels(IEnumerable<IPredictor> models)
@@ -104,5 +104,24 @@ namespace Microsoft.ML.Trainers.Ensemble
             return new EnsembleModelParameters(Host, p.PredictionKind,
                     models.Select(k => new FeatureSubsetModel<float>((TScalarPredictor)k)).ToArray(), combiner);
         }
-    }
+
+        private protected override void CheckLabel(RoleMappedData data)
+        {
+            Contracts.AssertValue(data);
+            data.CheckBinaryLabel();
+        }
+
+        private protected override SchemaShape.Column[] GetOutputColumnsCore(SchemaShape inputSchema)
+        {
+            return new[]
+            {
+                new SchemaShape.Column(DefaultColumnNames.Score, SchemaShape.Column.VectorKind.Scalar, NumberDataViewType.Single, false, new SchemaShape(AnnotationUtils.GetTrainerOutputAnnotation())),
+                new SchemaShape.Column(DefaultColumnNames.Probability, SchemaShape.Column.VectorKind.Scalar, NumberDataViewType.Single, false, new SchemaShape(AnnotationUtils.GetTrainerOutputAnnotation(true))),
+                new SchemaShape.Column(DefaultColumnNames.PredictedLabel, SchemaShape.Column.VectorKind.Scalar, BooleanDataViewType.Instance, false, new SchemaShape(AnnotationUtils.GetTrainerOutputAnnotation()))
+            };
+        }
+
+        private protected override BinaryPredictionTransformer<EnsembleModelParametersBase<float>>
+            MakeTransformer(EnsembleModelParametersBase<float> model, DataViewSchema trainSchema)
+            => new BinaryPredictionTransformer<EnsembleModelParametersBase<float>>(Host, model, trainSchema, FeatureColumn.Name);
 }

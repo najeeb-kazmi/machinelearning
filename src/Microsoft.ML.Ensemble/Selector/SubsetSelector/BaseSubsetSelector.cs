@@ -27,7 +27,7 @@ namespace Microsoft.ML.Trainers.Ensemble.SubsetSelector
         protected int Size;
         protected RoleMappedData Data;
         protected int BatchSize;
-        protected Single ValidationDatasetProportion;
+        protected float ValidationDatasetProportion;
 
         protected BaseSubsetSelector(TOptions options, IHostEnvironment env, string name)
         {
@@ -40,7 +40,7 @@ namespace Microsoft.ML.Trainers.Ensemble.SubsetSelector
             FeatureSelector = BaseSubsetSelectorOptions.FeatureSelector.CreateComponent(Host);
         }
 
-        public void Initialize(RoleMappedData data, int size, int batchSize, Single validationDatasetProportion)
+        public void Initialize(RoleMappedData data, int size, int batchSize, float validationDatasetProportion)
         {
             Host.CheckValue(data, nameof(data));
             Host.CheckParam(size > 0, nameof(size));

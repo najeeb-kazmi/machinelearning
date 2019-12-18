@@ -88,7 +88,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             ctx.Writer.Write((int)_weightageKind);
         }
 
-        public override Combiner<VBuffer<Single>> GetCombiner()
+        public override Combiner<VBuffer<float>> GetCombiner()
         {
             return CombineCore;
         }

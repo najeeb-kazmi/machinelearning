@@ -22,10 +22,10 @@ using Microsoft.ML.Trainers.Ensemble;
 
 namespace Microsoft.ML.Trainers.Ensemble
 {
-    using TScalarPredictor = IPredictorProducing<Single>;
+    using TScalarPredictor = IPredictorProducing<float>;
     using TScalarTrainer = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<float>>, IPredictorProducing<float>>;
 
-    internal sealed class RegressionEnsembleTrainer : EnsembleTrainerBase<Single,
+    internal sealed class RegressionEnsembleTrainer : EnsembleTrainerBase<float,
        IRegressionSubModelSelector, IRegressionOutputCombiner>,
        IModelCombiner
     {

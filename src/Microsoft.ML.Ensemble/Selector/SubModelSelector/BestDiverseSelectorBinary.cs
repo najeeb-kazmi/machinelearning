@@ -38,8 +38,8 @@ namespace Microsoft.ML.Trainers.Ensemble
 
         }
 
-        public override List<ModelDiversityMetric<Single>> CalculateDiversityMeasure(IList<FeatureSubsetModel<float>> models,
-            ConcurrentDictionary<FeatureSubsetModel<float>, Single[]> predictions)
+        public override List<ModelDiversityMetric<float>> CalculateDiversityMeasure(IList<FeatureSubsetModel<float>> models,
+            ConcurrentDictionary<FeatureSubsetModel<float>, float[]> predictions)
         {
             var diversityMetric = CreateDiversityMetric();
             return diversityMetric.CalculateDiversityMeasure(models, predictions);

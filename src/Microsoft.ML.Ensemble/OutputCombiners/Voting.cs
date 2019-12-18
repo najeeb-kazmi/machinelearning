@@ -46,7 +46,7 @@ namespace Microsoft.ML.Trainers.Ensemble
             // *** Binary format ***
             // int: sizeof(Single)
             int cbFloat = ctx.Reader.ReadInt32();
-            _host.CheckDecode(cbFloat == sizeof(Single));
+            _host.CheckDecode(cbFloat == sizeof(float));
         }
 
         public static Voting Create(IHostEnvironment env, ModelLoadContext ctx)
@@ -65,15 +65,15 @@ namespace Microsoft.ML.Trainers.Ensemble
 
             // *** Binary format ***
             // int: sizeof(Single)
-            ctx.Writer.Write(sizeof(Single));
+            ctx.Writer.Write(sizeof(float));
         }
 
-        public Combiner<Single> GetCombiner()
+        public Combiner<float> GetCombiner()
         {
             return CombineCore;
         }
 
-        private void CombineCore(ref Single dst, Single[] src, Single[] weights)
+        private void CombineCore(ref float dst, float[] src, float[] weights)
         {
             _host.AssertNonEmpty(src);
             _host.Assert(weights == null || Utils.Size(weights) == Utils.Size(src));
@@ -89,7 +89,7 @@ namespace Microsoft.ML.Trainers.Ensemble
                 else if (v <= 0)
                     neg++;
             }
-            dst = (Single)(pos - neg) / (pos + neg);
+            dst = (float)(pos - neg) / (pos + neg);
         }
     }
 }
