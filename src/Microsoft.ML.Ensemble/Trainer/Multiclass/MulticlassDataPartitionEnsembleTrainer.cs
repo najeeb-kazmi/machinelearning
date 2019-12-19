@@ -31,7 +31,7 @@ namespace Microsoft.ML.Trainers.Ensemble
     /// </summary>
     internal sealed class MulticlassDataPartitionEnsembleTrainer :
         EnsembleTrainerBase<VBuffer<float>,
-        IMulticlassSubModelSelector, IMulticlassOutputCombiner>,
+        IMulticlassSubModelSelector, IMulticlassOutputCombiner, MulticlassPredictionTransformer<EnsembleMulticlassModelParameters>, EnsembleMulticlassModelParameters>,
         IModelCombiner
     {
         public const string LoadNameValue = "WeightedEnsembleMulticlass";
@@ -72,7 +72,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         private readonly ISupportMulticlassOutputCombinerFactory _outputCombiner;
 
         public MulticlassDataPartitionEnsembleTrainer(IHostEnvironment env, Arguments args)
-            : base(args, env, LoadNameValue)
+            : base(args, env, LoadNameValue, TrainerUtils.MakeU4ScalarColumn(args.LabelColumnName))
         {
             SubModelSelector = args.SubModelSelectorType.CreateComponent(Host);
             _outputCombiner = args.OutputCombiner;
@@ -87,9 +87,9 @@ namespace Microsoft.ML.Trainers.Ensemble
 
         private protected override PredictionKind PredictionKind => PredictionKind.MulticlassClassification;
 
-        private protected override IPredictor CreatePredictor(List<FeatureSubsetModel<VBuffer<float>>> models)
+        private protected override EnsembleMulticlassModelParameters CreatePredictor()
         {
-            return new EnsembleMulticlassModelParameters(Host, CreateModels<TVectorPredictor>(models), Combiner as IMulticlassOutputCombiner);
+            return new EnsembleMulticlassModelParameters(Host, CreateModels<TVectorPredictor>(Models), Combiner as IMulticlassOutputCombiner);
         }
 
         public IPredictor CombineModels(IEnumerable<IPredictor> models)
@@ -103,5 +103,29 @@ namespace Microsoft.ML.Trainers.Ensemble
                 combiner);
             return predictor;
         }
+
+        private protected override void CheckLabel(RoleMappedData data)
+        {
+            Contracts.AssertValue(data);
+            data.CheckMulticlassLabel(out int numClasses);
+        }
+
+        private protected override SchemaShape.Column[] GetOutputColumnsCore(SchemaShape inputSchema)
+        {
+            bool success = inputSchema.TryFindColumn(LabelColumn.Name, out var labelCol);
+            Contracts.Assert(success);
+
+            var metadata = new SchemaShape(labelCol.Annotations.Where(x => x.Name == AnnotationUtils.Kinds.KeyValues)
+                .Concat(AnnotationUtils.GetTrainerOutputAnnotation()));
+            return new[]
+            {
+                new SchemaShape.Column(DefaultColumnNames.Score, SchemaShape.Column.VectorKind.Vector, NumberDataViewType.Single, false, new SchemaShape(AnnotationUtils.AnnotationsForMulticlassScoreColumn(labelCol))),
+                new SchemaShape.Column(DefaultColumnNames.PredictedLabel, SchemaShape.Column.VectorKind.Scalar, NumberDataViewType.UInt32, true, metadata)
+            };
+        }
+
+        private protected override MulticlassPredictionTransformer<EnsembleMulticlassModelParameters>
+            MakeTransformer(EnsembleMulticlassModelParameters model, DataViewSchema trainSchema)
+            => new MulticlassPredictionTransformer<EnsembleMulticlassModelParameters>(Host, model, trainSchema, FeatureColumn.Name, LabelColumn.Name);
     }
 }

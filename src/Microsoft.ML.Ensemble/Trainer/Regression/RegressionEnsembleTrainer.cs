@@ -26,7 +26,7 @@ namespace Microsoft.ML.Trainers.Ensemble
     using TScalarTrainer = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<float>>, IPredictorProducing<float>>;
 
     internal sealed class RegressionEnsembleTrainer : EnsembleTrainerBase<float,
-       IRegressionSubModelSelector, IRegressionOutputCombiner, RegressionPredictionTransformer<EnsembleModelParametersBase<float>>, EnsembleModelParametersBase<float>>,
+       IRegressionSubModelSelector, IRegressionOutputCombiner, RegressionPredictionTransformer<EnsembleModelParameters>, EnsembleModelParameters>,
        IModelCombiner
     {
         public const string LoadNameValue = "EnsembleRegression";
@@ -60,7 +60,7 @@ namespace Microsoft.ML.Trainers.Ensemble
         private readonly ISupportRegressionOutputCombinerFactory _outputCombiner;
 
         public RegressionEnsembleTrainer(IHostEnvironment env, Arguments args)
-            : base(args, env, LoadNameValue)
+            : base(args, env, LoadNameValue, TrainerUtils.MakeR4ScalarColumn(args.LabelColumnName))
         {
             SubModelSelector = args.SubModelSelectorType.CreateComponent(Host);
             _outputCombiner = args.OutputCombiner;
@@ -75,7 +75,7 @@ namespace Microsoft.ML.Trainers.Ensemble
 
         private protected override PredictionKind PredictionKind => PredictionKind.Regression;
 
-        private protected override EnsembleModelParametersBase<float> CreatePredictor()
+        private protected override EnsembleModelParameters CreatePredictor()
         {
             return new EnsembleModelParameters(Host, PredictionKind, CreateModels<TScalarPredictor>(Models), Combiner);
         }
@@ -108,8 +108,8 @@ namespace Microsoft.ML.Trainers.Ensemble
             };
         }
 
-        private protected override RegressionPredictionTransformer<EnsembleModelParametersBase<float>>
-            MakeTransformer(EnsembleModelParametersBase<float> model, DataViewSchema trainSchema)
-            => new RegressionPredictionTransformer<EnsembleModelParametersBase<float>>(Host, model, trainSchema, FeatureColumn.Name);
+        private protected override RegressionPredictionTransformer<EnsembleModelParameters>
+            MakeTransformer(EnsembleModelParameters model, DataViewSchema trainSchema)
+            => new RegressionPredictionTransformer<EnsembleModelParameters>(Host, model, trainSchema, FeatureColumn.Name);
     }
 }

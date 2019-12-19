@@ -124,4 +124,5 @@ namespace Microsoft.ML.Trainers.Ensemble
         private protected override BinaryPredictionTransformer<EnsembleModelParametersBase<float>>
             MakeTransformer(EnsembleModelParametersBase<float> model, DataViewSchema trainSchema)
             => new BinaryPredictionTransformer<EnsembleModelParametersBase<float>>(Host, model, trainSchema, FeatureColumn.Name);
+    }
 }
